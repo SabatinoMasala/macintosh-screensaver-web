@@ -5,6 +5,14 @@
 import { Bitmap, SCENE_W, SCENE_H } from './bitmap.js';
 import { createControl } from './controls.js';
 
+const RAMPS = Object.freeze({
+    right: Object.freeze([1, 0]),
+    left: Object.freeze([-1, 0]),
+    up: Object.freeze([0, -1]),
+    down: Object.freeze([0, 1]),
+    none: Object.freeze([0, 0]),
+});
+
 export class Scene {
     constructor(resources) {
         this.res = resources; // {images, fonts, cursors, acurs}
@@ -37,15 +45,10 @@ export class Scene {
         if (name === 'scene') this.log.push(value);
     }
 
+    // A shared constant array, read once per rendered frame: do not modify it.
     get rampVector() {
         // bitmap space (y down); the binary's cases are none/left/right/up/down
-        switch (String(this.vars.ramp).toLowerCase()) {
-            case 'right': return [1, 0];
-            case 'left': return [-1, 0];
-            case 'up': return [0, -1];
-            case 'down': return [0, 1];
-            default: return [0, 0];
-        }
+        return RAMPS[String(this.vars.ramp).toLowerCase()] || RAMPS.none;
     }
 
     addControl(ins) {

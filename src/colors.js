@@ -26,6 +26,10 @@ const lin = (rgb255) => rgb255.map((v) => srgbToLinear(v / 255));
 
 // The six "pure" hues the spectrum setting cycles through (linear RGB), sector i..i+1 blends linearly.
 const SPECTRUM = [lin(SYSTEM.red[0]), lin(SYSTEM.orange[0]), lin(SYSTEM.yellow[0]), lin(SYSTEM.green[0]), lin(SYSTEM.blue[0]), lin(SYSTEM.purple[0])];
+// the system colours in linear RGB, [light, dark] (computed once instead of per step)
+const SYSTEM_LINEAR = Object.fromEntries(Object.entries(SYSTEM).map(([k, v]) => [k, [lin(v[0]), lin(v[1])]]));
+const GRAY = [0.7, 0.7, 0.77];
+const DARK_GRAY = [0.165, 0.15, 0.15];
 
 export class ColorState {
     constructor({ color = 'random', appearance = 'automatic', contrast = 0.2, accent = null } = {}) {
@@ -38,12 +42,27 @@ export class ColorState {
         this.randomPick = null;
         this.pickRandom();
         this.current = this.target.slice();
+        this.out = { bottom: [0, 0, 0], top: [0, 0, 0], pixel: [0, 0, 0], dark: false }; // uniforms(), reused
+        // one MediaQueryList for 'automatic', kept current by its change event
+        // (onChange lets the player re-render when the system appearance flips)
+        this.onChange = null;
+        this.systemDark = false;
+        const mq = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+        if (mq) {
+            this.systemDark = mq.matches;
+            const listener = (e) => {
+                this.systemDark = e.matches;
+                this.onChange?.();
+            };
+            if (mq.addEventListener) mq.addEventListener('change', listener);
+            else mq.addListener?.(listener); // Safari < 14
+        }
     }
 
     get isDark() {
         if (this.appearance === 'dark') return true;
         if (this.appearance === 'light') return false;
-        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        return this.systemDark;
     }
 
     // "Random" picks one of the fixed colours for each new program.
@@ -55,41 +74,58 @@ export class ColorState {
         this.randomPick = next;
     }
 
-    resolveTarget(t) {
+    // The target colour at time t, written into out (default: a new array).
+    resolveTarget(t, out = [0, 0, 0]) {
         const dark = this.isDark;
         const name = this.color === 'random' ? this.randomPick : this.color;
+        let src;
         switch (name) {
             case 'spectrum': {
                 const u = ((t % 60) + 60) % 60 / 60 * 6;
                 const i = Math.floor(u) % 6, f = u - Math.floor(u);
                 const a = SPECTRUM[i], b = SPECTRUM[(i + 1) % 6];
-                return [0, 1, 2].map((k) => a[k] + (b[k] - a[k]) * f);
+                for (let k = 0; k < 3; k++) out[k] = a[k] + (b[k] - a[k]) * f;
+                return out;
             }
             case 'accent':
-                return lin(this.accent || SYSTEM.blue[dark ? 1 : 0]);
+                if (this.accent) {
+                    if (this.accentLinear?.src !== this.accent) this.accentLinear = { src: this.accent, rgb: lin(this.accent) };
+                    src = this.accentLinear.rgb;
+                } else src = SYSTEM_LINEAR.blue[dark ? 1 : 0];
+                break;
             case 'gray':
-                return [0.7, 0.7, 0.77];
+                src = GRAY;
+                break;
             case 'darkgray':
-                return [0.165, 0.15, 0.15];
+                src = DARK_GRAY;
+                break;
             default:
-                return lin((SYSTEM[name] || SYSTEM.blue)[dark ? 1 : 0]);
+                src = (SYSTEM_LINEAR[name] || SYSTEM_LINEAR.blue)[dark ? 1 : 0];
         }
+        out[0] = src[0]; out[1] = src[1]; out[2] = src[2];
+        return out;
     }
 
     // Per frame: move the scene colour towards the target (the original blends each frame).
     update(t, dt) {
-        this.target = this.resolveTarget(t);
+        this.resolveTarget(t, this.target);
         const k = this.color === 'spectrum' ? 1 : 1 - Math.pow(0.02, dt);
         for (let i = 0; i < 3; i++) this.current[i] += (this.target[i] - this.current[i]) * k;
     }
 
+    // The colour uniforms of the renderer. The returned object is reused by the next call.
     uniforms() {
         const dark = this.isDark;
         const factor = dark ? 0.3 : 1;
-        const bottom = this.current.map((c) => c * factor);
         const lighten = dark ? 0.09 : 0.26;
-        const top = bottom.map((c) => srgbToLinear(linearToSrgb(c) * (1 - lighten) + lighten));
-        const pixel = bottom.map((c) => c * this.contrast);
-        return { bottom, top, pixel, dark };
+        const { bottom, top, pixel } = this.out;
+        for (let i = 0; i < 3; i++) {
+            const c = this.current[i] * factor;
+            bottom[i] = c;
+            top[i] = srgbToLinear(linearToSrgb(c) * (1 - lighten) + lighten);
+            pixel[i] = c * this.contrast;
+        }
+        this.out.dark = dark;
+        return this.out;
     }
 }

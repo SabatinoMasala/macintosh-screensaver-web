@@ -163,15 +163,10 @@ export async function loadResources(base = 'assets', onProgress = () => {}) {
         })),
         ...images.map((n) => attempt('images', n, `${n}.png`, async (url) => {
             const sprite = decodeImage(await loadImage(url), FRAME_WIDTHS[n]);
-            // full-screen images are used as the base layer: cache them as bitmaps
+            // full-screen images are used as the base layer: a read-only bitmap view of
+            // the sprite's ink (shared, not copied; Scene.compose only copies from it)
             let cached = null;
-            sprite.asBitmap = () => {
-                if (!cached) {
-                    cached = new Bitmap(sprite.w, sprite.h);
-                    cached.data.set(sprite.ink);
-                }
-                return cached;
-            };
+            sprite.asBitmap = () => (cached ??= new Bitmap(sprite.w, sprite.h, sprite.ink));
             res.images[n] = sprite;
         })),
         ...fonts.map((n) => attempt('fonts', n, `${n}.bin`, async (url) => {

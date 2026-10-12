@@ -74,12 +74,39 @@ let scene, processor, programName;
 let time = 0;
 window.mac = {};
 
+// ---- rendering on demand: the loop renders when the simulation stepped or something marked
+// the frame dirty (look settings, colours, appearance, size, program switch, first frame).
+// While paused the requestAnimationFrame loop stops altogether until one of those happens.
+let dirty = true;
+let rafId = 0;
+let restarted = true; // the next frame is the first after a (re)start: it advances no time
+function requestFrame() {
+    if (!rafId && AVAILABLE.length) rafId = requestAnimationFrame(frame);
+}
+function invalidate() {
+    dirty = true;
+    requestFrame();
+}
+renderer.onResize = invalidate;
+colors.onChange = invalidate; // the system appearance flipped (prefers-color-scheme)
+// a change of devicePixelRatio (window moved to another display) without a CSS size change
+(function watchPixelRatio() {
+    const mq = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+    const onChange = () => {
+        mq.removeEventListener?.('change', onChange);
+        invalidate();
+        watchPixelRatio();
+    };
+    mq.addEventListener?.('change', onChange);
+})();
+
 function startProgram(name) {
     programName = name;
     scene = new Scene(resources);
     processor = new Processor(resources.programs[name], scene);
     if (settings.color === 'random') colors.pickRandom();
     Object.assign(window.mac, { scene, processor, renderer, colors, settings }); // for poking around in devtools
+    invalidate();
 }
 
 function nextProgram() {
@@ -102,16 +129,17 @@ for (const key of ['shadow', 'shadowSize', 'shadowSoftness']) {
         settings[key] = parseFloat(e.target.value);
         localStorage.setItem(`mac.${key}`, e.target.value);
         show();
+        invalidate();
     };
 }
 $('pixelRatio').value = String(settings.pixelRatio);
 if ($('pixelRatio').value !== String(settings.pixelRatio)) $('pixelRatio').value = settings.pixelRatio = 'auto';
-$('color').onchange = (e) => { settings.color = colors.color = e.target.value; localStorage.setItem('mac.color', e.target.value); colors.pickRandom(); };
-$('appearance').onchange = (e) => { settings.appearance = colors.appearance = e.target.value; localStorage.setItem('mac.appearance', e.target.value); };
-$('contrast').onchange = (e) => { settings.contrast = colors.contrast = parseFloat(e.target.value); localStorage.setItem('mac.contrast', e.target.value); };
+$('color').onchange = (e) => { settings.color = colors.color = e.target.value; localStorage.setItem('mac.color', e.target.value); colors.pickRandom(); invalidate(); };
+$('appearance').onchange = (e) => { settings.appearance = colors.appearance = e.target.value; localStorage.setItem('mac.appearance', e.target.value); invalidate(); };
+$('contrast').onchange = (e) => { settings.contrast = colors.contrast = parseFloat(e.target.value); localStorage.setItem('mac.contrast', e.target.value); invalidate(); };
 $('program').onchange = (e) => { settings.program = e.target.value; nextProgram(); };
 $('speed').oninput = (e) => (settings.speed = parseFloat(e.target.value));
-$('pixelRatio').onchange = (e) => { settings.pixelRatio = e.target.value; localStorage.setItem('mac.pixelRatio', e.target.value); };
+$('pixelRatio').onchange = (e) => { settings.pixelRatio = e.target.value; localStorage.setItem('mac.pixelRatio', e.target.value); invalidate(); };
 // ---- actions: one function each, shared by the keyboard, the control bar and the panel buttons
 const panel = $('panel');
 const isPanelOpen = () => panel.classList.contains('open');
@@ -130,10 +158,11 @@ function setPaused(paused) {
     btn.classList.toggle('paused', paused);
     btn.title = paused ? 'Resume (Space)' : 'Pause (Space)';
     btn.setAttribute('aria-label', paused ? 'Resume' : 'Pause');
+    if (!paused) requestFrame(); // the loop stops while paused
 }
 const togglePause = () => setPaused(!settings.paused);
 
-const randomColour = () => colors.pickRandom();
+const randomColour = () => { colors.pickRandom(); invalidate(); };
 
 // iPhone Safari only does fullscreen for <video>: webkitFullscreenEnabled is false there, so the button is hidden
 const fullscreenSupported = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
@@ -165,14 +194,20 @@ document.addEventListener('webkitfullscreenchange', onFullscreenChange);
 const UI_TIMEOUT = 3000;
 let hideTimer = 0;
 let hoveringBar = false;
+let uiVisible = true; // the status line is only written while it can be seen
 function wake() {
     document.body.classList.remove('ui-idle');
     clearTimeout(hideTimer);
     hideTimer = setTimeout(sleepUi, UI_TIMEOUT);
+    if (!uiVisible) {
+        uiVisible = true;
+        if (scene) updateStatus();
+    }
 }
 function sleepUi() {
     if (isPanelOpen() || hoveringBar) return; // closing the panel / leaving the bar calls wake() again
     document.body.classList.add('ui-idle');
+    uiVisible = false;
 }
 // Where the last press started. While the bar is hidden it has pointer-events: none, so the tap
 // that reveals it lands on the canvas; the click that follows must not press the button that is
@@ -227,22 +262,60 @@ toast.style.opacity = 1;
 setTimeout(() => (toast.style.opacity = 0), 4000);
 wake();
 
-// main loop: fixed 30 Hz simulation, rendered on every animation frame
+// main loop: fixed 30 Hz simulation, rendered only when it stepped or the frame is dirty (see invalidate)
 if (!AVAILABLE.length) {
     status.textContent = 'no scene can play: every scene is missing resources';
     if (resources.apple.installed) showNotice('No scene can play: resources are missing (see the console). Run <code>scripts/extract-apple-assets.sh --check</code>.');
 } else {
     nextProgram();
 }
-let last = performance.now();
+let last = 0;
 let accumulator = 0;
-let frameCount = 0;
+let stepCount = 0;
 
 // What -[PixelsRenderer draw] reads from the processor: camera, scroll, scale plus the sign
 // of its running animation (which with the ramp variable gives rampDirection), zoom.
+// One object, refilled for every render.
+const rs = { camera: null, scroll: null, scale: 0, scaleDirection: 0, zoom: 0, ramp: null };
 function renderState() {
     const v = scene.vars;
-    return { camera: v.camera, scroll: v.scroll, scale: v.scale, scaleDirection: v.scaleDirection, zoom: v.zoom, ramp: scene.rampVector };
+    rs.camera = v.camera;
+    rs.scroll = v.scroll;
+    rs.scale = v.scale;
+    rs.scaleDirection = v.scaleDirection;
+    rs.zoom = v.zoom;
+    rs.ramp = scene.rampVector;
+    return rs;
+}
+
+// Every number a render depends on besides the bitmap, the look settings and the size
+// (those mark the frame dirty). Records them and says whether they changed since the
+// last call, so a step that changes nothing visible costs no GPU work.
+const lastInputs = new Float64Array(18).fill(NaN);
+let inputsDiffer = false;
+function put(i, v) {
+    if (lastInputs[i] !== v) {
+        lastInputs[i] = v;
+        inputsDiffer = true;
+    }
+}
+function inputsChanged(s, c) {
+    inputsDiffer = false;
+    put(0, s.camera[0]); put(1, s.camera[1]); put(2, s.scroll[0]); put(3, s.scroll[1]);
+    put(4, s.scale); put(5, s.scaleDirection); put(6, s.zoom); put(7, s.ramp[0]); put(8, s.ramp[1]);
+    for (let k = 0; k < 3; k++) {
+        put(9 + k, c.bottom[k]);
+        put(12 + k, c.top[k]);
+        put(15 + k, c.pixel[k]);
+    }
+    return inputsDiffer;
+}
+
+let statusText = '';
+function updateStatus() {
+    const v = scene.vars;
+    const text = `${programName} · ${v.scene} · scroll ${v.scroll[0].toFixed(0)},${v.scroll[1].toFixed(0)} · cam ${v.camera[0]},${v.camera[1]} · scale ${v.scale.toFixed(2)} zoom ${v.zoom.toFixed(2)}`;
+    if (text !== statusText) status.textContent = statusText = text;
 }
 
 function applyLook() {
@@ -265,16 +338,21 @@ function advance(seconds) {
     renderer.uploadBitmap(scene.compose(time));
     applyLook();
     const v = scene.vars;
-    renderer.render(renderState(), colors.uniforms(), time);
+    const u = colors.uniforms();
+    inputsChanged(renderState(), u); // keep the loop's change check in step with what is on screen
+    renderer.render(rs, u, time);
+    if (uiVisible) updateStatus();
     return { program: programName, scene: v.scene, scroll: v.scroll, scale: v.scale, zoom: v.zoom, time };
 }
 window.mac.advance = advance;
 window.mac.freeze = () => setPaused(true);
 window.mac.ui = { wake, setPanel, setPaused, togglePause, randomColour, toggleFullscreen };
+window.mac.invalidate = invalidate;
 
 function frame(now) {
-    requestAnimationFrame(frame);
-    let dt = Math.min(0.25, (now - last) / 1000);
+    rafId = 0;
+    let dt = restarted ? 0 : Math.min(0.25, Math.max(0, (now - last) / 1000));
+    restarted = false;
     last = now;
     if (settings.paused) dt = 0;
     accumulator += dt * settings.speed;
@@ -286,19 +364,23 @@ function frame(now) {
         scene.update(time, FRAME_DT);
         colors.update(time, FRAME_DT);
         stepped = true;
+        stepCount++;
         if (processor.finished && programName !== WALLPAPER_PROGRAM) {
             nextProgram();
             break;
         }
     }
-    if (stepped || !renderer.texW) {
-        renderer.uploadBitmap(scene.compose(time));
+    // the texture only changes when the composed bitmap does
+    const uploaded = stepped || !renderer.texW ? renderer.uploadBitmap(scene.compose(time)) : false;
+    if (stepped || dirty || uploaded) {
+        applyLook();
+        const u = colors.uniforms();
+        const changed = inputsChanged(renderState(), u);
+        if (dirty || uploaded || changed) renderer.render(rs, u, time);
+        dirty = false;
+        if (uiVisible && (stepped ? (stepCount & 3) === 0 : true)) updateStatus();
     }
-    applyLook();
-    const v = scene.vars;
-    renderer.render(renderState(), colors.uniforms(), time);
-    if ((frameCount++ & 7) === 0) {
-        status.textContent = `${programName} · ${v.scene} · scroll ${v.scroll.map((n) => n.toFixed(0)).join(',')} · cam ${v.camera.join(',')} · scale ${v.scale.toFixed(2)} zoom ${v.zoom.toFixed(2)}`;
-    }
+    if (settings.paused) restarted = true; // stop until a setting, a resize or unpausing asks for a frame
+    else requestFrame();
 }
-if (AVAILABLE.length) requestAnimationFrame(frame);
+requestFrame();

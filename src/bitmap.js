@@ -5,10 +5,11 @@ export const SCENE_W = 512;
 export const SCENE_H = 342;
 
 export class Bitmap {
-    constructor(w = SCENE_W, h = SCENE_H) {
+    // data: an existing w*h byte array to wrap (shared, not copied), or a new one
+    constructor(w = SCENE_W, h = SCENE_H, data = new Uint8Array(w * h)) {
         this.w = w;
         this.h = h;
-        this.data = new Uint8Array(w * h);
+        this.data = data;
     }
     clear(v = 0) {
         this.data.fill(v);
