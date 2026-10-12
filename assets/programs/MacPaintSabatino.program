@@ -1,9 +1,9 @@
 //
 //  MacPaint Sabatino
-//  Macintosh 40th Anniversary
+//  Added scene (not part of Apple's set)
 //
-//  Copyright © 2024 Apple. All rights reserved.
-//  Variant of MacPaintHello: the mouse writes "Sabatino" in cursive.
+//  A variant of Apple's MacPaintHello: the mouse writes "Sabatino" in cursive
+//  instead of "hello", then the drawing is revealed from the other side.
 //
 //-------------------------------------------------------------------------------------------------------------------------------------------------
 

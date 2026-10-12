@@ -9,7 +9,7 @@
 //
 //   node tools/perf/redundancy.mjs [baseUrl]   (GL=metal|swiftshader, SIM_SECONDS)
 
-import { chromium } from '/Users/sabatino/www/unipage/node_modules/playwright/index.mjs';
+import { chromium } from 'playwright';
 
 const BASE = process.argv[2] || 'http://127.0.0.1:8767/';
 const GL = process.env.GL || 'metal';

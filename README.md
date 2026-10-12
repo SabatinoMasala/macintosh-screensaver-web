@@ -7,7 +7,13 @@ the choreography (camera moves, the mouse drawing "hello" in MacPaint, the 1984
 on the calculator, the 15-puzzle, the Style menu...) is the original one. On top
 of Apple's 15 scenes it adds 17 of its own, written in the same scene language.
 
-![MacPaint "hello", rendered in the browser](screenshots/final_MacPaintHello.png)
+![The MacPaint scene writing "Sabatino" in cursive](screenshots/scene_MacPaintSabatino.png)
+
+*Apple's MacPaint "hello" scene, asked to write something else. The scene scripts are plain text, so an agent (or you) can change an existing program: this one is `MacPaintHello` with a new set of mouse strokes.*
+
+![The Scrapbook desk accessory showing a dithered portrait of Steve Jobs](screenshots/scene_Scrapbook.png)
+
+*A program that does not exist in the original: the Scrapbook desk accessory, drawn and scripted from scratch. New programs are a `.program` script plus a 1-bit image, and optionally a small JavaScript module for interactive controls.*
 
 This repository holds the player and the project's own scenes only. **Apple's
 resources are not included**: you extract them from your own copy of macOS 26
@@ -25,8 +31,8 @@ that was reverse-engineered and how.
 ## Setup
 
 ```
-git clone <this repository> rea-macintosh
-cd rea-macintosh
+git clone https://github.com/SabatinoMasala/macintosh-screensaver-web.git
+cd macintosh-screensaver-web
 scripts/extract-apple-assets.sh     # copies Apple's resources into assets/apple/
 python3 -m http.server 8765
 open http://localhost:8765/
@@ -112,8 +118,8 @@ src/renderer.js   WebGL2: gradient background, instanced shadow + pixel tiles
 src/colors.js     the colour pipeline (system colours, spectrum, light/dark, contrast)
 src/nfnt.js       classic Macintosh bitmap font decoder
 src/curs.js       classic cursor decoder (+ animated cursors)
-tools/            the python helpers used for the analysis, the screenshot script
-screenshots/      renders of the scenes
+tools/            the python helpers used for the analysis, the screenshot script (needs `npm install playwright`), the perf harness
+screenshots/      renders of the project's scenes
 ```
 
 `src/resources.js` keeps the lists of Apple's file names (`APPLE_PROGRAMS`,
@@ -187,10 +193,10 @@ non-Retina screens).
   drew (`assets/images/`) recreate the classic Macintosh look by reusing pixels
   from Apple's artwork (window chrome, the menu bar, desktop and Finder icons)
   and contain text set in Apple's bitmap fonts (Chicago, Geneva, Monaco). The
-  screenshots in `screenshots/` are renders of the scenes, Apple's included. The
-  MIT License covers the project's own contribution only. If you redistribute
-  these images or screenshots, judge for yourself whether that is acceptable
-  for your use.
+  screenshots in `screenshots/` are renders of the project's own scenes (some
+  of which show Apple's screen images at run time). The MIT License covers the
+  project's own contribution only. If you redistribute these images or
+  screenshots, judge for yourself whether that is acceptable for your use.
 - The Scrapbook portrait is a public-domain photograph (Bernard Gotfryd, 1984,
   Library of Congress), the Photoshop scene uses NASA's public-domain Earthrise.
 

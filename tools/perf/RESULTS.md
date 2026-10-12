@@ -79,7 +79,7 @@ Before and after were compared on deterministic screenshots: seeded `Math.random
 
 - At 1x the output is bit-identical.
 - On a Retina-sized canvas the differences are anti-aliasing along the tile and shadow edges: the differing pixels are those edges, plus ±1 dither noise in the background gradient, which is now computed at the target resolution. At 1:1 device pixels the crops cannot be told apart.
-- `tools/screenshot.mjs` shots of `?program=IconGardenWallpaper&color=gray` and Mines match `screenshots/crisp_light.png` and `screenshots/scene_Mines.png` and print no page errors.
+- `tools/screenshot.mjs` shots of `?program=IconGardenWallpaper&color=gray` and Mines match the pre-change renders pixel for pixel and print no page errors.
 
 ## Not done / options
 

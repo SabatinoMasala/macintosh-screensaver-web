@@ -1,4 +1,5 @@
-import { chromium } from '/Users/sabatino/www/unipage/node_modules/playwright/index.mjs';
+// Needs playwright on the import path: npm install playwright (node_modules/ is gitignored).
+import { chromium } from 'playwright';
 const [url, out, waitMs = '3000', w = '1280', h = '800', dpr = '1'] = process.argv.slice(2);
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const page = await browser.newPage({ viewport: { width: +w, height: +h }, deviceScaleFactor: +dpr });

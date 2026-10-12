@@ -7,7 +7,7 @@
 // GL work runs on the CPU, so render timings are NOT GPU timings. Use the numbers for
 // JS cost, memory, call counts and relative (pixel-proportional) render cost.
 //
-// Output: a table on stdout, tools/perf/<REPORT>-<date>.md and /tmp/claude-501/perf/<REPORT>-<date>-<gl>.json
+// Output: a table on stdout, tools/perf/<REPORT>-<date>.md and $TMPDIR/macintosh-perf/<REPORT>-<date>-<gl>.json
 // (merged across runs). Env: GL=metal|swiftshader, SIM_SECONDS, LIVE_SECONDS, SOAK_SECONDS, PAUSED_SECONDS,
 // REPORT (default 'baseline'; e.g. 'after'), REPORT_DIR (default tools/perf).
 //
@@ -17,16 +17,17 @@
 // emulated (renderer.devicePixelSize). 'paused' measures what the page costs while paused.
 // The script also runs against the pre-fix code (it then forces samples the old way).
 
-import { chromium } from '/Users/sabatino/www/unipage/node_modules/playwright/index.mjs';
+import { chromium } from 'playwright';
 import fs from 'node:fs';
 import { execSync } from 'node:child_process';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BASE = process.argv[2] || 'http://127.0.0.1:8767/';
 const PHASES = new Set((process.argv[3] || 'sim,matrix,live,paused,soak').split(','));
-const SCRATCH = '/tmp/claude-501/perf';
+const SCRATCH = path.join(os.tmpdir(), 'macintosh-perf');
 const REPORT = process.env.REPORT || 'baseline';
 const REPORT_DIR = process.env.REPORT_DIR || HERE;
 const PAUSED_SECONDS = +(process.env.PAUSED_SECONDS || 20);
