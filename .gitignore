@@ -1,0 +1,7 @@
+.DS_Store
+node_modules/
+__pycache__/
+
+# Apple's proprietary resources, extracted locally by scripts/extract-apple-assets.sh.
+# Never commit or redistribute them.
+assets/apple/

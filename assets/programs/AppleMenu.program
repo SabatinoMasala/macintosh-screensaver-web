@@ -1,0 +1,57 @@
+//
+//  Apple Menu
+//  Added scene (not part of Apple's set)
+//
+//  The Apple menu pulled down over the System 1 Finder: the mouse presses on the
+//  Apple, drags slowly down the desk accessories and releases on Scrapbook.
+//
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+start simultaneous
+	scale out
+	let image = "FinderWindow"
+	let cursor = "Arrow"
+	let ramp = "None"
+	add menu at 9, 0 value 1 name "AppleMenu"
+end simultaneous
+
+gosub applemenu
+
+exit
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+applemenu:
+
+	start simultaneous
+		let scene = "applemenu"
+		let ramp = "Right"
+		camera to -22.5, 45
+		scroll to 150, 30
+		mouse to 60, 100
+		reset controls
+	end simultaneous
+
+	scroll to 80, 30 over 10 seconds curve easeout async "scroll1"
+	scale in over 3 seconds
+
+	wait for 4 seconds
+
+	mouse to 24, 10 over 2 seconds curve easeinout
+
+	wait for "scroll1" to complete
+
+	mouse down
+	wait for 0.5 seconds
+
+	scroll to 80, 150 over 17 seconds curve easeinout async "scroll2"
+	mouse to 57, 155 over 17 seconds curve easeinout
+	wait for 0.1 seconds
+	mouse up
+	wait for 0.8 seconds
+
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------

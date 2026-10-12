@@ -1,0 +1,108 @@
+//
+//  HyperCard
+//  Added scene (not part of Apple's set)
+//
+//  Bill Atkinson's HyperCard (1987) on a compact Mac: the Home card with its
+//  stack buttons fills the screen. The browse tool clicks the Address stack and
+//  the card dissolves into the Address stack's first card; its Home button then
+//  wipes back to the Home card.
+//
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+start simultaneous
+	scale out
+	let image = "HyperCard"
+	let cursor = "Arrow"
+	let ramp = "None"
+	add dissolve at 108, 147 size 56, 48 action "dissolve" name "HyperCardAddress"
+	add dissolve at 232, 299 size 48, 48 action "wipe" name "HyperCard"
+end simultaneous
+
+gosub home
+gosub stacks
+gosub address
+
+exit
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+home:
+
+	start simultaneous
+		let scene = "home"
+		let ramp = "Down"
+		camera to -22.5, 45
+		scroll to 80, 36
+		mouse to 470, 230
+		reset controls
+	end simultaneous
+
+	scroll to 300, 66 over 18 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+stacks:
+
+	start simultaneous
+		let scene = "stacks"
+		let ramp = "Left"
+		camera to 22.5, 45
+		scroll to 444, 122
+		mouse to 476, 158
+	end simultaneous
+
+	scroll to 150, 126 over 20 seconds async "pan"
+	scale in over 3 seconds
+
+	wait until 3 seconds before "pan" completes
+	mouse to 136, 120 over 2 seconds curve easeout
+	wait for "pan" to complete
+
+	mouse down
+	wait for 0.3 seconds
+	mouse up
+
+	scroll to 110, 160 over 9 seconds async "scroll"
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+address:
+
+	start simultaneous
+		let scene = "address"
+		let ramp = "Right"
+		camera to -22.5, 45
+		scroll to 120, 96
+		mouse to 136, 120
+	end simultaneous
+
+	scroll to 236, 262 over 16 seconds async "pan"
+	scale in over 3 seconds
+
+	wait for 10 seconds
+	mouse to 256, 272 over 3 seconds curve easeout
+	wait for "pan" to complete
+
+	mouse down
+	wait for 0.3 seconds
+	mouse up
+
+	scroll to 330, 250 over 9 seconds async "scroll"
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,88 @@
+//
+//  Alarm Clock
+//  Added scene (not part of Apple's set)
+//
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+start simultaneous
+	scale out
+	let image = "AlarmClock"
+	let cursor = "None"
+	let ramp = "None"
+	add time at 203, 143 value 1 name "Chicago12"
+	add button at 307, 162 size 24, 24
+	add button at 181, 216 size 50, 28
+	add button at 232, 216 size 49, 28
+	add button at 282, 216 size 49, 28
+end simultaneous
+
+gosub clock
+gosub settings
+
+exit
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+clock:
+
+	start simultaneous
+		let scene = "clock"
+		let ramp = "Right"
+		let cursor = "None"
+		camera to -22.5, 45
+		scroll to 190, 145
+	end simultaneous
+
+	scroll to 320, 145 over 18 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+settings:
+
+	start simultaneous
+		let scene = "settings"
+		let image = "AlarmClock"
+		let ramp = "Down"
+		let cursor = "Arrow"
+		camera to 22.5, 45
+		scroll to 300, 140
+		mouse to 362, 178
+		reset controls
+	end simultaneous
+
+	scroll to 240, 210 over 18 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait for 1 second
+
+	mouse to 319, 152 over 1.5 seconds curve easeout
+	wait for 0.3 seconds
+
+	mouse down
+	wait for 0.2 seconds
+	mouse up
+	let image = "AlarmClockOpen"
+
+	wait for 2.5 seconds
+
+	mouse to 258, 204 over 1.5 seconds curve easeout
+	wait for 0.3 seconds
+
+	mouse down
+	wait for 0.2 seconds
+	mouse up
+
+	mouse to 300, 236 over 2 seconds curve easeout
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------

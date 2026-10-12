@@ -1,0 +1,127 @@
+//
+//  Excel
+//  Added scene (not part of Apple's set)
+//
+//  Microsoft Excel 1.0 for the Macintosh (September 1985). A label goes into A1,
+//  four numbers into column B (the Mac's 512, 128, 1024 and 320 K), B6 gets
+//  =SUM(B2:B5) and shows 1984, and the column is selected from B2 down to the total.
+//
+//  `add spreadsheet at 30, 77` is the grid's top-left: the line left of column A
+//  and above row 1. Cell centres: A1 62, 85 · B2 126, 101 · B6 126, 165.
+//
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+start simultaneous
+	scale out
+	let image = "Excel"
+	let cursor = "Arrow"
+	let ramp = "None"
+	add spreadsheet at 30, 77 size 461, 244
+end simultaneous
+
+gosub label
+gosub total
+gosub select
+
+exit
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+label:
+
+	start simultaneous
+		let scene = "label"
+		let ramp = "Down"
+		camera to 22.5, 45
+		scroll to 66, 50
+		mouse to 120, 130
+		reset controls
+	end simultaneous
+
+	scroll to 165, 140 over 20 seconds curve easeinout async "scroll"
+	scale in over 3 seconds
+
+	mouse to 52, 87 over 1.5 seconds curve easeout
+	wait for 0.2 seconds
+	mouse click
+	mouse to 70, 112 over 0.5 seconds curve easeout
+	wait for 0.5 seconds
+	keyboard "Macintosh\n"
+	wait for 1.5 seconds
+
+	mouse to 112, 102 over 1 second curve easeout
+	wait for 0.2 seconds
+	mouse click
+	mouse to 172, 128 over 0.5 seconds curve easeout
+	wait for 0.5 seconds
+	keyboard "512\n"
+	wait for 0.8 seconds
+	keyboard "128\n"
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+total:
+
+	start simultaneous
+		let scene = "total"
+		let ramp = "Up"
+		camera to -22.5, 45
+		scroll to 160, 110
+		mouse to 172, 128
+	end simultaneous
+
+	scroll to 100, 200 over 20 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait for 0.5 seconds
+	keyboard "1024\n"
+	wait for 0.8 seconds
+	keyboard "320\n"
+	wait for 1 second
+
+	mouse to 112, 166 over 1.5 seconds curve easeout
+	wait for 0.2 seconds
+	mouse click
+	mouse to 70, 190 over 0.6 seconds curve easeout
+	wait for 0.5 seconds
+	keyboard "=SUM(B2:B5)\n"
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+select:
+
+	start simultaneous
+		let scene = "select"
+		let ramp = "Right"
+		camera to 22.5, 45
+		scroll to 90, 85
+		mouse to 70, 190
+	end simultaneous
+
+	scroll to 170, 165 over 18 seconds async "scroll"
+	scale in over 3 seconds
+
+	mouse to 108, 102 over 1.5 seconds curve easeout
+	wait for 0.3 seconds
+	mouse down
+	mouse to 112, 166 over 2 seconds curve easeinout
+	wait for 0.2 seconds
+	mouse up
+	mouse to 190, 150 over 1 second curve easeout
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------

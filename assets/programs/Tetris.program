@@ -1,0 +1,147 @@
+//
+//  Tetris
+//  Added scene (not part of Apple's set)
+//
+//  Keys for the tetris control: l left, r right, u rotate, d soft drop,
+//  space hard drop, p pause (held across the fades between sub-scenes).
+//
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+start simultaneous
+	scale out
+	let image = "Tetris"
+	let cursor = "None"
+	let ramp = "None"
+	add tetris at 206, 276
+end simultaneous
+
+gosub falling
+gosub tetris
+gosub score
+
+exit
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+falling:
+
+	start simultaneous
+		let scene = "falling"
+		let ramp = "Down"
+		camera to 22.5, 45
+		scroll to 335, 105
+		reset controls
+	end simultaneous
+
+	scroll to 245, 240 over 20 seconds async "scroll"
+	scale in over 3 seconds
+
+	// O: lands on its own; T: upside down, one left, into the notch
+	wait for 5 seconds
+	keyboard "uu"
+	wait for 1.5 seconds
+	keyboard "l"
+
+	// J: all the way right, completes a line
+	wait for 4.8 seconds
+	keyboard "rr"
+	wait for 0.4 seconds
+	keyboard "rr"
+	wait for 0.6 seconds
+	keyboard " "
+
+	wait until 3 seconds before "scroll" completes
+	keyboard "p"
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+tetris:
+
+	start simultaneous
+		let scene = "tetris"
+		let ramp = "Up"
+		camera to -22.5, 45
+		scroll to 245, 135
+	end simultaneous
+
+	scroll to 262, 262 over 20 seconds curve easeout async "scroll"
+	scale in over 3 seconds
+	keyboard "p"
+
+	// L: upright, against the left wall
+	keyboard "u"
+	wait for 0.3 seconds
+	keyboard "llll"
+	wait for 0.5 seconds
+	keyboard " "
+
+	// S: on its side, fills the gap
+	wait for 1 second
+	keyboard "u"
+	wait for 0.5 seconds
+	keyboard "r"
+	wait for 1.5 seconds
+	keyboard "dd"
+	keyboard " "
+
+	// I: upright into the open column, four lines
+	wait for 1 second
+	keyboard "u"
+	wait for 0.5 seconds
+	keyboard "rrrr"
+	wait for 2 seconds
+	keyboard "dddd"
+	wait for 0.5 seconds
+	keyboard " "
+
+	// O: heads right, dropped in the next scene
+	wait for 1.5 seconds
+	keyboard "rr"
+	wait for 0.3 seconds
+	keyboard "rr"
+
+	wait until 3 seconds before "scroll" completes
+	keyboard "p"
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+score:
+
+	start simultaneous
+		let scene = "score"
+		let ramp = "Right"
+		camera to 22.5, 45
+		scroll to 160, 105
+	end simultaneous
+
+	scroll to 215, 215 over 18 seconds async "scroll"
+	scale in over 3 seconds
+	keyboard "p"
+
+	// O: into the corner, one more line
+	wait for 0.5 seconds
+	keyboard " "
+
+	// T and Z fall faster at level 2
+	wait for 1.5 seconds
+	keyboard "l"
+	wait for 2 seconds
+	keyboard " "
+
+	wait for 1.5 seconds
+	keyboard "ll"
+	wait for 1.5 seconds
+	keyboard "ddd"
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------

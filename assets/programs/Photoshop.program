@@ -1,0 +1,104 @@
+//
+//  Photoshop
+//  Added scene (not part of Apple's set)
+//
+//  Adobe Photoshop 1.0 (1990) on a 1-bit Macintosh: the toolbox at the left and a
+//  document window with NASA's Earthrise (Apollo 8, 24 December 1968, AS08-14-2383,
+//  public domain), Atkinson-dithered. The marquee tool drags a selection around the
+//  Earth, the marching ants crawl, and a click on the Image menu blurs the selection.
+//  The drag (207, 66 to 301, 142) is exactly the rectangle blurred in PhotoshopBlurred.
+//
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+start simultaneous
+	scale out
+	let image = "Photoshop"
+	let cursor = "Crosshair"
+	let ramp = "None"
+	add marquee at 63, 317 size 426, 272
+	add button at 158, 18 size 56, 19
+end simultaneous
+
+gosub tools
+gosub select
+
+exit
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+tools:
+
+	start simultaneous
+		let image = "Photoshop"
+		let scene = "tools"
+		let cursor = "None"
+		let ramp = "Right"
+		camera to 22.5, 45
+		scroll to 32, 62
+		mouse to 255, 128
+		reset controls
+	end simultaneous
+
+	scroll to 32, 215 over 12 seconds async "toolbox"
+	scale in over 3 seconds
+
+	wait for "toolbox" to complete
+	scroll to 320, 262 over 22 seconds async "scroll"
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+select:
+
+	start simultaneous
+		let image = "Photoshop"
+		let scene = "select"
+		let cursor = "Crosshair"
+		let ramp = "Down"
+		camera to -22.5, 45
+		scroll to 214, 78
+		mouse to 180, 122
+		reset controls
+	end simultaneous
+
+	scroll to 256, 106 over 10 seconds curve easeinout async "follow"
+	scale in over 3 seconds
+
+	mouse to 207, 66 over 1.5 seconds curve easeout
+	wait for 0.3 seconds
+
+	mouse down
+	mouse to 301, 142 over 2.5 seconds curve easeinout
+	wait for 0.1 seconds
+	mouse up
+
+	wait for "follow" to complete
+	wait for 3 seconds
+
+	let cursor = "Arrow"
+	scroll to 200, 48 over 9 seconds curve easeinout async "follow"
+	mouse to 186, 10 over 7 seconds curve easeinout
+	wait for "follow" to complete
+	wait for 0.3 seconds
+
+	mouse down
+	wait for 0.5 seconds
+	let image = "PhotoshopBlurred"
+	wait for 0.3 seconds
+	mouse up
+
+	wait for 0.5 seconds
+
+	scroll to 254, 106 over 12 seconds curve easeinout async "scroll"
+	mouse to 330, 70 over 4 seconds curve easeinout
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------

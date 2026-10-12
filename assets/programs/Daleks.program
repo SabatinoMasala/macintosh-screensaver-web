@@ -1,0 +1,126 @@
+//
+//  Daleks
+//  Added scene (not part of Apple's set)
+//
+//  Daleks by Johan Strandberg, 1984: the Doctor, the Daleks closing in one step
+//  per turn, scrap heaps where they collide. Keys: 1-9 move like a keypad
+//  (5 = stay), t = teleport, s = sonic screwdriver.
+//
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+start simultaneous
+	scale out
+	let image = "Daleks"
+	let cursor = "None"
+	let ramp = "None"
+	add daleks at 112, 246
+end simultaneous
+
+gosub title
+gosub invasion
+gosub exterminate
+
+exit
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+title:
+
+	start simultaneous
+		let scene = "title"
+		let ramp = "Down"
+		camera to -22.5, 45
+		scroll to 110, 28
+		reset controls
+	end simultaneous
+
+	scroll to 250, 70 over 14 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+invasion:
+
+	start simultaneous
+		let scene = "invasion"
+		let ramp = "Right"
+		camera to 22.5, 45
+		scroll to 304, 138
+		reset controls
+	end simultaneous
+
+	scroll to 244, 160 over 11 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait for 1.5 seconds
+	keyboard "4"
+	wait for 0.8 seconds
+	keyboard "5"
+	wait for 1.5 seconds
+	keyboard "3"
+	wait for 0.8 seconds
+	keyboard "s"
+	wait for 1.2 seconds
+	keyboard "5"
+	wait for 0.8 seconds
+	keyboard "5"
+	wait for 1.2 seconds
+	keyboard "t"
+	cancel async "scroll"
+	scroll to 192, 166 over 12 seconds curve easeout async "scroll"
+	wait for 1.4 seconds
+	keyboard "5"
+	wait for 0.8 seconds
+	keyboard "5"
+	wait for 0.8 seconds
+	keyboard "5"
+	wait for 0.8 seconds
+	keyboard "5"
+	wait for 0.8 seconds
+	keyboard "5"
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+exterminate:
+
+	start simultaneous
+		let scene = "exterminate"
+		let ramp = "Up"
+		camera to -22.5, 45
+		scroll to 228, 238
+	end simultaneous
+
+	scroll to 256, 136 over 20 seconds curve easeout async "scroll"
+	scale in over 3 seconds
+
+	wait for 2 seconds
+	keyboard "8"
+	wait for 0.8 seconds
+	keyboard "5"
+	wait for 0.8 seconds
+	keyboard "5"
+	wait for 1.2 seconds
+	keyboard "s"
+	wait for 1.2 seconds
+	keyboard "5"
+	wait for 1.5 seconds
+	keyboard "7"
+	wait for 1.2 seconds
+	keyboard "3"
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------

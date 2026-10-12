@@ -1,0 +1,85 @@
+//
+//  Scrapbook
+//  Added scene (not part of Apple's set)
+//
+//  The System 1 Scrapbook desk accessory on the Finder desktop: page 1 is a
+//  dithered portrait of Steve Jobs with the Macintosh (January 1984, Bernard
+//  Gotfryd, Library of Congress, public domain), page 2 the Macintosh 128K
+//  from the same photograph. The mouse clicks the right scroll arrow to flip.
+//
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+start simultaneous
+	scale out
+	let image = "Scrapbook"
+	let cursor = "None"
+	let ramp = "None"
+	add button at 393, 297 size 14, 14 action "next"
+end simultaneous
+
+gosub portrait
+gosub flip
+
+exit
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+portrait:
+
+	start simultaneous
+		let image = "Scrapbook"
+		let scene = "portrait"
+		let cursor = "None"
+		let ramp = "Right"
+		camera to -22.5, 45
+		scroll to 175, 150
+		reset controls
+	end simultaneous
+
+	scroll to 300, 150 over 25 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+flip:
+
+	start simultaneous
+		let image = "Scrapbook"
+		let scene = "flip"
+		let cursor = "Arrow"
+		let ramp = "Down"
+		camera to 22.5, 45
+		scroll to 340, 230
+		mouse to 330, 215
+		reset controls
+	end simultaneous
+
+	scroll to 390, 278 over 6 seconds curve easeout async "scroll1"
+	scale in over 3 seconds
+
+	mouse to 399, 290 over 2.5 seconds curve easeinout
+
+	wait for "scroll1" to complete
+	wait for 0.3 seconds
+
+	mouse down
+	wait for 0.2 seconds
+	mouse up
+	let image = "ScrapbookPage2"
+
+	wait for 0.6 seconds
+
+	scroll to 255, 128 over 20 seconds curve easeinout async "scroll"
+	mouse to 425, 312 over 1.5 seconds curve easeout
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------

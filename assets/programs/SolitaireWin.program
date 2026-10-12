@@ -1,0 +1,84 @@
+//
+//  Klondike (won)
+//  Added scene (not part of Apple's set)
+//
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+start simultaneous
+	scale out
+	let image = "Solitaire"
+	let cursor = "None"
+	let ramp = "None"
+	add solitairewin at 126, 106
+end simultaneous
+
+gosub launch
+gosub bounce
+gosub table
+
+exit
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+launch:
+
+	start simultaneous
+		let scene = "launch"
+		let ramp = "Right"
+		camera to -22.5, 45
+		zoom to 0
+		scroll to 320, 95
+		reset controls
+	end simultaneous
+
+	scroll to 225, 135 over 20 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait for 0.5 seconds
+	keyboard "w"
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+bounce:
+
+	start simultaneous
+		let scene = "bounce"
+		let ramp = "Left"
+		camera to 22.5, 45
+		scroll to 140, 255
+	end simultaneous
+
+	scroll to 280, 255 over 22 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+table:
+
+	start simultaneous
+		let scene = "table"
+		let ramp = "Right"
+		camera to -22.5, 45
+		zoom to 0
+		scroll to 190, 135
+	end simultaneous
+
+	scroll to 320, 200 over 25 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------

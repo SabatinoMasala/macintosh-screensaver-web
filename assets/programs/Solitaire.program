@@ -1,0 +1,185 @@
+//
+//  Klondike
+//  Added scene (not part of Apple's set)
+//
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+start simultaneous
+	scale out
+	let image = "Solitaire"
+	let cursor = "Arrow"
+	let ramp = "None"
+	add solitaire at 126, 106
+end simultaneous
+
+gosub deck
+gosub flip
+gosub chain
+gosub stack
+
+exit
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+deck:
+
+	start simultaneous
+		let scene = "deck"
+		let ramp = "Right"
+		camera to -22.5, 45
+		scroll to 130, 92
+		mouse to 150, 112
+		reset controls
+	end simultaneous
+
+	scroll to 275, 80 over 20 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait for 0.3 seconds
+
+	mouse to 142, 84 over 1.2 seconds curve easeout
+	wait for 0.2 seconds
+	mouse click
+	wait for 0.8 seconds
+	mouse click
+	wait for 0.8 seconds
+
+	mouse to 189, 68 over 0.8 seconds curve easeout
+	wait for 0.2 seconds
+	mouse down
+	wait for 0.2 seconds
+	mouse to 265, 68 over 7 seconds curve easeinout
+	mouse up
+
+	wait for 1 second
+	mouse to 262, 100 over 1.5 seconds curve easeout
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+flip:
+
+	start simultaneous
+		let scene = "flip"
+		let ramp = "Down"
+		camera to 22.5, 45
+		scroll to 175, 140
+		mouse to 165, 160
+	end simultaneous
+
+	scroll to 255, 70 over 20 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait for 0.3 seconds
+
+	mouse to 189, 124 over 1 second curve easeout
+	wait for 0.2 seconds
+	mouse down
+	wait for 0.2 seconds
+	mouse to 227, 140 over 2 seconds curve easeinout
+	mouse up
+
+	wait for 0.8 seconds
+
+	mouse to 189, 120 over 1.2 seconds curve easeout
+	wait for 0.2 seconds
+	mouse down
+	wait for 0.2 seconds
+	mouse to 265, 67 over 6 seconds curve easeinout
+	mouse up
+
+	wait for 1 second
+	mouse to 262, 100 over 1.5 seconds curve easeout
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+chain:
+
+	start simultaneous
+		let scene = "chain"
+		let ramp = "Left"
+		camera to -22.5, 45
+		scroll to 300, 125
+		mouse to 335, 135
+	end simultaneous
+
+	scroll to 355, 175 over 20 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait for 0.3 seconds
+
+	mouse to 341, 140 over 1 second curve easeout
+	wait for 0.2 seconds
+	mouse down
+	wait for 0.2 seconds
+	mouse to 303, 148 over 2 seconds curve easeinout
+	mouse up
+
+	wait for 1 second
+
+	mouse to 341, 136 over 1.2 seconds curve easeout
+	wait for 0.2 seconds
+	mouse down
+	wait for 0.2 seconds
+	mouse to 303, 160 over 2 seconds curve easeinout
+	mouse up
+
+	wait for 1 second
+
+	mouse to 341, 132 over 1.2 seconds curve easeout
+	wait for 0.2 seconds
+	mouse down
+	wait for 0.2 seconds
+	mouse to 379, 156 over 2 seconds curve easeinout
+	mouse up
+
+	wait for 1 second
+	mouse to 350, 200 over 1.5 seconds curve easeout
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+stack:
+
+	start simultaneous
+		let scene = "stack"
+		let ramp = "Right"
+		camera to 22.5, 45
+		scroll to 205, 125
+		mouse to 205, 160
+	end simultaneous
+
+	scroll to 265, 175 over 15 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait for 0.3 seconds
+
+	mouse to 227, 127 over 1.2 seconds curve easeout
+	wait for 0.2 seconds
+	mouse down
+	wait for 0.2 seconds
+	mouse to 265, 143 over 3 seconds curve easeinout
+	mouse up
+
+	wait for 1.5 seconds
+	mouse to 262, 205 over 2 seconds curve easeout
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------

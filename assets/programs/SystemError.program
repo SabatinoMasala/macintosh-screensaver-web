@@ -1,0 +1,87 @@
+//
+//  System Error
+//  Added scene (not part of Apple's set)
+//
+//  The classic bomb alert over the Finder: the fuse burns, the mouse clicks
+//  Restart and the Mac comes back up to the blinking "?" floppy.
+//
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+start simultaneous
+	scale out
+	let image = "SystemError"
+	let cursor = "Arrow"
+	let ramp = "None"
+	add icon at 116, 77 value 4 name "Bomb"
+	add button at 223, 116 size 74, 18 action "restart"
+end simultaneous
+
+gosub alert
+gosub reboot
+
+exit
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+alert:
+
+	start simultaneous
+		let scene = "alert"
+		let ramp = "Right"
+		camera to -22.5, 45
+		scroll to 105, 83
+		mouse to 340, 200
+		reset controls
+	end simultaneous
+
+	scroll to 300, 83 over 22 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait for 6 seconds
+
+	mouse to 290, 130 over 3 seconds curve easeinout
+
+	wait for 2 seconds
+
+	mouse to 262, 108 over 1 second curve easeout
+
+	mouse down
+	wait for 0.2 seconds
+	mouse up
+
+	wait for 1 second
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+reboot:
+
+	start simultaneous
+		let image = "StartupDesktop"
+		let scene = "reboot"
+		let cursor = "None"
+		let ramp = "Right"
+		camera to -22.5, 45
+		mouse to 256, 171
+		scroll to 196, 171
+		add startupicon at 240, 155 name "StartupIcons"
+		reset controls
+	end simultaneous
+
+	scroll to 316, 171 over 14 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait for 3.5 seconds
+
+	mouse click
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------

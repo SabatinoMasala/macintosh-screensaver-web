@@ -1,0 +1,148 @@
+//
+//  Hangman
+//  Added scene (not part of Apple's set)
+//
+//  A Hangman desk accessory: MACINTOSH is guessed with three wrong letters,
+//  then New Game deals SABATINO, which is lost on purpose. The camera follows
+//  the guesses: the word for a hit, the gallows and the wrong letters for a miss.
+//
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+start simultaneous
+	scale out
+	let image = "Hangman"
+	let cursor = "None"
+	let ramp = "None"
+	add button at 263, 183 size 72, 18 action "newGame"
+	add hangman at 159, 221 name "MACINTOSH_SABATINO"
+end simultaneous
+
+gosub macintosh
+gosub sabatino
+
+exit
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+macintosh:
+
+	start simultaneous
+		let scene = "macintosh"
+		let ramp = "Down"
+		let cursor = "None"
+		camera to 22.5, 45
+		scroll to 215, 205
+		mouse to 240, 200
+		reset controls
+	end simultaneous
+
+	// the blanks
+	scroll to 250, 200 over 7 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait for 0.5 seconds
+	keyboard "A"
+	wait for 1 second
+	keyboard "T"
+	wait for 1 second
+	keyboard "O"
+	wait for "scroll" to complete
+
+	// up to the gallows and the wrong letters
+	scroll to 245, 130 over 5 seconds async "scroll"
+	wait for 2.5 seconds
+	keyboard "E"
+	wait for 1.2 seconds
+	keyboard "R"
+	wait for "scroll" to complete
+	keyboard "L"
+	wait for 1 second
+
+	// back down to the word
+	scroll to 215, 200 over 6 seconds async "scroll"
+	wait for 3.5 seconds
+	keyboard "M"
+	wait for 1 second
+	keyboard "C"
+	wait for 1 second
+	keyboard "I"
+	wait for "scroll" to complete
+
+	// along the word to the result
+	scroll to 300, 185 over 11 seconds async "scroll"
+	wait for 1.5 seconds
+	keyboard "N"
+	wait for 2 seconds
+	keyboard "S"
+	wait for 2 seconds
+	keyboard "H"
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+sabatino:
+
+	start simultaneous
+		let scene = "sabatino"
+		let ramp = "Up"
+		let cursor = "Arrow"
+		camera to -22.5, 45
+		scroll to 315, 168
+		mouse to 250, 150
+	end simultaneous
+
+	// New Game
+	scroll to 285, 192 over 5 seconds async "scroll"
+	scale in over 3 seconds
+
+	mouse to 298, 176 over 1.2 seconds curve easeout
+	wait for 0.1 seconds
+	mouse down
+	wait for 0.25 seconds
+	mouse up
+	wait for 0.4 seconds
+	let cursor = "None"
+	wait for "scroll" to complete
+
+	// the blanks
+	scroll to 245, 200 over 5 seconds async "scroll"
+	wait for 1 second
+	keyboard "A"
+	wait for 1.2 seconds
+	keyboard "S"
+	wait for 1.2 seconds
+	keyboard "T"
+	wait for "scroll" to complete
+
+	// the gallows
+	scroll to 245, 125 over 5 seconds async "scroll"
+	wait for 2 seconds
+	keyboard "E"
+	wait for 1.2 seconds
+	keyboard "R"
+	wait for "scroll" to complete
+	keyboard "U"
+	wait for 1.2 seconds
+	keyboard "L"
+	wait for 0.8 seconds
+
+	// the last two legs, the word revealed
+	scroll to 250, 185 over 5 seconds async "scroll"
+	wait for 3 seconds
+	keyboard "D"
+	wait for "scroll" to complete
+	keyboard "Y"
+	wait for 1 second
+
+	// the hanged man and the verdict
+	scroll to 240, 148 over 7 seconds async "scroll"
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,97 @@
+//
+//  Note Pad
+//  Added scene (not part of Apple's set)
+//
+//  The System 1 Note Pad desk accessory: the first words the Macintosh spoke at
+//  its introduction on January 24, 1984 (SAM's script, as Andy Hertzfeld wrote
+//  it down on folklore.org) are typed onto page 1, the maxim gets selected, and
+//  the mouse turns the page at the dog-eared corner.
+//
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+start simultaneous
+	scale out
+	let image = "NotePad"
+	let cursor = "None"
+	let ramp = "None"
+	add text at 41, 66 value 1 name "Geneva12"
+	add button at 36, 236 size 19, 19
+end simultaneous
+
+gosub hello
+gosub dogear
+
+exit
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+hello:
+
+	start simultaneous
+		let scene = "hello"
+		let ramp = "Down"
+		camera to 22.5, 45
+		scroll to 88, 52
+		mouse to 190, 172
+		reset controls
+	end simultaneous
+
+	scroll to 108, 150 over 30 seconds curve easeout async "scroll"
+	scale in over 3 seconds
+
+	wait for 2 seconds
+	keyboard "Hello, I am Macintosh.\nIt sure is great to get out\nof that bag!"
+	wait for 2 seconds
+	keyboard "\n\nNever trust a computer\n"
+	wait for 1 second
+	keyboard "that you can't lift!"
+	wait for 1 second
+
+	let cursor = "Text"
+	mouse to 41, 134 over 1.5 seconds curve easeout
+	mouse down
+	mouse to 158, 152 over 3 seconds curve easeinout
+	mouse up
+
+	wait for 2 seconds
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+dogear:
+
+	start simultaneous
+		let scene = "dogear"
+		let ramp = "Right"
+		let cursor = "Arrow"
+		camera to -22.5, 45
+		scroll to 175, 115
+		mouse to 100, 100
+	end simultaneous
+
+	// deselect the maxim while the screen is still dark
+	wait for 0.1 seconds
+	mouse click
+	mouse to 205, 190
+
+	scroll to 60, 232 over 16 seconds curve easeout async "scroll"
+	scale in over 3 seconds
+
+	wait for 6 seconds
+
+	mouse to 46, 229 over 2 seconds curve easeout
+	wait for 0.2 seconds
+	mouse down
+	wait for 0.3 seconds
+	mouse up
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------

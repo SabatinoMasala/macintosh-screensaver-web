@@ -1,0 +1,188 @@
+//
+//  Mines
+//  Added scene (not part of Apple's set)
+//
+//  A 1-bit Minesweeper desk accessory over the Finder. The first click opens
+//  most of the left of the field, the numbers prove the next cells safe, a mine
+//  is flagged ("f" arms flag mode) and the counter drops to 9, and the last
+//  50/50 in the bottom row goes wrong: every mine shows, the face dies.
+//
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+start simultaneous
+	scale out
+	let image = "Mines"
+	let cursor = "Arrow"
+	let ramp = "None"
+	add minefield at 163, 253
+end simultaneous
+
+gosub open
+gosub deduce
+gosub boom
+gosub aftermath
+
+exit
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+open:
+
+	start simultaneous
+		let scene = "open"
+		let ramp = "Down"
+		camera to 22.5, 45
+		scroll to 205, 105
+		mouse to 140, 180
+		reset controls
+	end simultaneous
+
+	scroll to 235, 185 over 16 seconds async "scroll"
+	scale in over 3 seconds
+
+	mouse to 203, 149 over 1.5 seconds curve easeout
+	wait for 0.4 seconds
+	mouse down
+	wait for 0.3 seconds
+	mouse up
+
+	wait for 1.5 seconds
+	mouse to 215, 190 over 3 seconds curve easeinout
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+deduce:
+
+	start simultaneous
+		let scene = "deduce"
+		let ramp = "Right"
+		camera to -22.5, 45
+		scroll to 255, 92
+		mouse to 215, 160
+	end simultaneous
+
+	// slow start: the counter stays in view until the flag is planted
+	scroll to 258, 205 over 22 seconds curve easein async "scroll"
+	scale in over 3 seconds
+
+	// the 1 next to the 3 only touches two covered cells, one of them proven safe
+	mouse to 267, 133 over 1.2 seconds curve easeout
+	wait for 0.3 seconds
+	mouse down
+	wait for 0.25 seconds
+	mouse up
+
+	// the cell above is the mine: flag it
+	wait for 0.8 seconds
+	keyboard "f"
+	wait for 0.8 seconds
+	mouse to 267, 117 over 0.6 seconds curve easeout
+	wait for 0.3 seconds
+	mouse click
+
+	wait for 0.8 seconds
+	mouse to 267, 149 over 0.8 seconds curve easeout
+	wait for 0.3 seconds
+	mouse down
+	wait for 0.25 seconds
+	mouse up
+
+	wait for 0.6 seconds
+	mouse to 267, 165 over 0.6 seconds curve easeout
+	wait for 0.3 seconds
+	mouse down
+	wait for 0.25 seconds
+	mouse up
+
+	wait for 0.8 seconds
+	mouse to 251, 181 over 0.8 seconds curve easeout
+	wait for 0.3 seconds
+	mouse down
+	wait for 0.25 seconds
+	mouse up
+
+	wait for 0.6 seconds
+	mouse to 251, 197 over 0.6 seconds curve easeout
+	wait for 0.3 seconds
+	mouse down
+	wait for 0.25 seconds
+	mouse up
+
+	wait for 1.2 seconds
+	mouse to 251, 213 over 0.8 seconds curve easeout
+	wait for 0.3 seconds
+	mouse down
+	wait for 0.25 seconds
+	mouse up
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+boom:
+
+	start simultaneous
+		let scene = "boom"
+		let ramp = "Up"
+		camera to 22.5, 45
+		scroll to 180, 222
+		mouse to 150, 195
+	end simultaneous
+
+	scroll to 262, 250 over 18 seconds async "scroll"
+	scale in over 3 seconds
+
+	// the 1 in the corner pins the mine above it, so the bottom-left cell is safe
+	mouse to 171, 245 over 1.2 seconds curve easeout
+	wait for 0.3 seconds
+	mouse down
+	wait for 0.25 seconds
+	mouse up
+
+	// a true 50/50 between the last two cells on the right: hesitate, then guess
+	wait for 1 second
+	mouse to 251, 229 over 2.5 seconds curve easeinout
+	wait for 1.2 seconds
+	mouse to 251, 245 over 0.6 seconds curve easeinout
+	wait for 0.8 seconds
+	mouse down
+	wait for 0.3 seconds
+	mouse up
+
+	// back off so the mine shows
+	wait for 0.8 seconds
+	mouse to 282, 266 over 1.5 seconds curve easeinout
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+aftermath:
+
+	start simultaneous
+		let scene = "aftermath"
+		let ramp = "Up"
+		camera to -22.5, 45
+		scroll to 245, 240
+	end simultaneous
+
+	scroll to 235, 100 over 13 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------

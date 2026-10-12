@@ -1,0 +1,130 @@
+//
+//  Sargon III
+//  Added scene (not part of Apple's set)
+//
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+start simultaneous
+	scale out
+	let image = "Chess"
+	let cursor = "Arrow"
+	let ramp = "None"
+	add chessboard at 62, 263
+end simultaneous
+
+gosub kingspawn
+gosub knights
+gosub bishop
+
+exit
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+kingspawn:
+
+	start simultaneous
+		let scene = "kingspawn"
+		let ramp = "Up"
+		camera to -22.5, 45
+		scroll to 172, 215
+		mouse to 214, 246
+		reset controls
+	end simultaneous
+
+	scroll to 168, 125 over 16 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait for 1 second
+
+	// 1. e4
+	mouse to 171, 229 over 1 second curve easeout
+	mouse down
+	wait for 0.2 seconds
+	mouse to 171, 181 over 1.5 seconds curve easeinout
+	mouse up
+	wait for 0.3 seconds
+	mouse to 206, 196 over 1 second curve easeout
+
+	// Sargon thinks: 1... e5
+	wait for 2 seconds
+	keyboard "e7e5"
+	wait for 1.5 seconds
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+knights:
+
+	start simultaneous
+		let scene = "knights"
+		let ramp = "Left"
+		camera to 22.5, 45
+		scroll to 212, 235
+		mouse to 236, 214
+	end simultaneous
+
+	scroll to 105, 105 over 18 seconds curve easeinout async "scroll"
+	scale in over 3 seconds
+
+	wait for 1 second
+
+	// 2. Nf3
+	mouse to 219, 253 over 1 second curve easeout
+	mouse down
+	wait for 0.2 seconds
+	mouse to 195, 205 over 1.5 seconds curve easeinout
+	mouse up
+	wait for 0.3 seconds
+	mouse to 168, 214 over 1 second curve easeout
+
+	// Sargon thinks: 2... Nc6
+	wait for 2 seconds
+	wait for 1.5 seconds
+	keyboard "b8c6"
+	wait for 1.5 seconds
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+bishop:
+
+	start simultaneous
+		let scene = "bishop"
+		let ramp = "Right"
+		camera to -22.5, 45
+		scroll to 190, 240
+		mouse to 222, 228
+	end simultaneous
+
+	scroll to 140, 195 over 7 seconds async "pan"
+	scale in over 3 seconds
+
+	wait for 1 second
+
+	// 3. Bb5, the Ruy Lopez
+	mouse to 195, 253 over 1 second curve easeout
+	mouse down
+	wait for 0.2 seconds
+	mouse to 99, 157 over 1.5 seconds curve easeinout
+	mouse up
+	wait for 0.5 seconds
+
+	// over to the move list
+	wait for "pan" to complete
+	scroll to 324, 110 over 26 seconds curve easeout async "scroll"
+	mouse to 300, 150 over 3 seconds curve easeinout
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------

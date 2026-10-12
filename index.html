@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Macintosh — screensaver reimplementation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+    html, body { margin: 0; height: 100%; background: #000; overflow: hidden; font: 13px/1.4 -apple-system, "Helvetica Neue", sans-serif; }
+    canvas#view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: default; touch-action: none; }
+    body.ui-idle canvas#view { cursor: none; }
+
+    /* settings panel */
+    #panel { position: fixed; z-index: 20; top: calc(12px + env(safe-area-inset-top)); right: calc(12px + env(safe-area-inset-right)); width: 320px; box-sizing: border-box;
+        max-height: calc(100vh - 96px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        max-height: calc(100dvh - 96px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+        background: rgba(20,20,24,0.88); color: #eee; border-radius: 12px; padding: 8px 14px 12px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.4); display: none; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    #panel.open { display: block; }
+    #panel .head { display: flex; align-items: center; justify-content: space-between; min-height: 36px; }
+    #panel h1 { font-size: 14px; margin: 0; }
+    #panel label { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; min-height: 36px; margin: 2px 0; column-gap: 8px; }
+    #panel select { flex: 1; max-width: 160px; min-height: 30px; }
+    #panel input[type=range] { flex: 0 0 130px; width: 130px; height: 30px; margin: 0; }
+    #panel .val { margin-left: auto; color: #999; font: 11px ui-monospace, Menlo, monospace; text-align: right; }
+    #panel .hint { color: #999; font-size: 11px; margin-top: 10px; }
+    #panel .row { display: flex; gap: 8px; margin-top: 10px; }
+    #panel .row button { flex: 1; min-height: 40px; background: #333; color: #eee; border: 0; border-radius: 8px; padding: 6px; font: inherit; cursor: pointer; }
+    #panel .row button:hover { background: #444; }
+    #panel .close { width: 36px; height: 36px; margin-right: -8px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: #bbb; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    #panel .close:hover { background: #333; color: #fff; }
+    #panel .close svg { width: 18px; height: 18px; }
+
+    /* on-screen control bar */
+    #controls { position: fixed; z-index: 10; right: calc(12px + env(safe-area-inset-right)); bottom: calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 8px;
+        transition: opacity .4s; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+    #controls button { width: 40px; height: 40px; padding: 0; border-radius: 50%; border: 1px solid rgba(255,255,255,0.18); background: rgba(20,20,24,0.55); color: #fff;
+        backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; cursor: pointer;
+        touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    #controls button:hover { background: rgba(60,60,66,0.75); }
+    #controls button[aria-pressed="true"] { background: rgba(255,255,255,0.88); color: #111; }
+    #controls button[hidden] { display: none; }
+    #controls .icon-play, #controls .paused .icon-pause, #controls .icon-collapse, #controls .active .icon-expand { display: none; }
+    #controls .paused .icon-play, #controls .active .icon-collapse { display: block; }
+    svg.icon { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    svg.icon .solid { fill: currentColor; }
+
+    #status { position: fixed; z-index: 5; left: calc(12px + env(safe-area-inset-left)); bottom: calc(10px + env(safe-area-inset-bottom)); max-width: calc(100% - 320px);
+        color: rgba(255,255,255,0.45); font-size: 11px; pointer-events: none; font-family: ui-monospace, Menlo, monospace; transition: opacity .4s; }
+    body.ui-idle #controls, body.ui-idle #status { opacity: 0; pointer-events: none; }
+    #toast { position: fixed; z-index: 30; left: 50%; top: calc(20px + env(safe-area-inset-top)); transform: translateX(-50%); max-width: calc(100% - 40px); box-sizing: border-box; text-align: center;
+        background: rgba(0,0,0,0.6); color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 12px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+
+    @media (pointer: coarse) {
+        #controls button { width: 44px; height: 44px; }
+        #panel select { font-size: 16px; } /* below 16px iOS zooms the page when a select gets focus */
+    }
+    /* shown when Apple's resources are missing; stays up (scenes keep playing behind it) */
+    #notice { position: fixed; z-index: 25; left: 50%; top: calc(20px + env(safe-area-inset-top)); transform: translateX(-50%); width: max-content; max-width: min(560px, calc(100% - 40px));
+        box-sizing: border-box; text-align: center; background: rgba(20,20,24,0.88); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 13px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.4); pointer-events: none; }
+    #notice[hidden] { display: none; }
+    #notice code { font: 12px ui-monospace, Menlo, monospace; background: rgba(255,255,255,0.12); padding: 1px 5px; border-radius: 4px; white-space: nowrap; }
+    body.has-notice #toast { top: calc(96px + env(safe-area-inset-top)); }
+    @media (max-width: 640px) {
+        /* the status line sits above the control bar instead of next to it */
+        #status { bottom: calc(68px + env(safe-area-inset-bottom)); max-width: calc(100% - 24px); }
+    }
+    @media (max-width: 520px) {
+        #panel { left: calc(8px + env(safe-area-inset-left)); right: calc(8px + env(safe-area-inset-right)); top: calc(8px + env(safe-area-inset-top)); width: auto;
+            max-height: calc(100vh - 84px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+            max-height: calc(100dvh - 84px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+        #panel label { white-space: normal; padding: 2px 0; }
+        #panel select, #panel input[type=range] { flex: 1 1 100%; width: 100%; max-width: none; }
+        #panel select { min-height: 36px; margin-top: 2px; }
+    }
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="notice" role="alert" hidden></div>
+<div id="toast">Move the mouse or tap for controls · <b>S</b> settings · <b>N</b> next · <b>Space</b> pause</div>
+<div id="panel" role="dialog" aria-label="Settings">
+    <div class="head">
+        <h1>Macintosh</h1>
+        <button id="close" class="close" type="button" title="Close (Esc)" aria-label="Close settings">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+    </div>
+    <label>Color <select id="color"></select></label>
+    <label>Appearance <select id="appearance"></select></label>
+    <label>Contrast <select id="contrast">
+        <option value="0.2">Screen saver</option>
+        <option value="0.666">Wallpaper</option>
+    </select></label>
+    <label>Program <select id="program"></select></label>
+    <label>Speed <input id="speed" type="range" min="0.25" max="4" step="0.25" value="1"></label>
+    <label title="Peak opacity of a tile's shadow (Apple: 0.375)">Shadow <span class="val" id="shadowVal"></span><input id="shadow" type="range" min="0" max="1" step="0.025" value="0.375"></label>
+    <label title="Shadow quad size, times the original 2.5-tile quad (Apple: 1)">Shadow size <span class="val" id="shadowSizeVal"></span><input id="shadowSize" type="range" min="0.4" max="1.5" step="0.05" value="1"></label>
+    <label title="Falloff width as a fraction of the shadow quad; lower = harder edge (Apple: 1)">Shadow softness <span class="val" id="shadowSoftnessVal"></span><input id="shadowSoftness" type="range" min="0.05" max="1" step="0.05" value="1"></label>
+    <label title="Canvas resolution. Auto = the display's exact device pixels">Pixel ratio <select id="pixelRatio">
+        <option value="auto">Auto</option>
+        <option value="1">1x</option>
+        <option value="2">2x</option>
+        <option value="3">3x</option>
+    </select></label>
+    <div class="row">
+        <button id="next" type="button">Next scene</button>
+        <button id="pause" type="button">Pause</button>
+    </div>
+    <div class="hint">Tap outside the panel to close it. Keys: S panel · N next · Space pause · R random colour · F fullscreen · Esc close</div>
+</div>
+<div id="controls" role="toolbar" aria-label="Controls">
+    <button id="btnSettings" type="button" title="Settings (S)" aria-label="Settings" aria-pressed="false">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>
+    </button>
+    <button id="btnNext" type="button" title="Next scene (N)" aria-label="Next scene">
+        <svg class="icon" viewBox="0 0 24 24"><path class="solid" d="M6 6l8 6-8 6z"/><path d="M18 6v12"/></svg>
+    </button>
+    <button id="btnPause" type="button" title="Pause (Space)" aria-label="Pause">
+        <svg class="icon icon-pause" viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></svg>
+        <svg class="icon icon-play" viewBox="0 0 24 24"><path class="solid" d="M8 5.5l11 6.5-11 6.5z"/></svg>
+    </button>
+    <button id="btnColour" type="button" title="Random colour (R)" aria-label="Random colour">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 3.5c3.6 4.2 6 7.4 6 10.5a6 6 0 0 1-12 0c0-3.1 2.4-6.3 6-10.5z"/><path d="M9.5 15a2.5 2.5 0 0 0 2.5 2.5"/></svg>
+    </button>
+    <button id="btnFullscreen" type="button" title="Fullscreen (F)" aria-label="Fullscreen">
+        <svg class="icon icon-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg>
+        <svg class="icon icon-collapse" viewBox="0 0 24 24"><path d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/></svg>
+    </button>
+</div>
+<div id="status"></div>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

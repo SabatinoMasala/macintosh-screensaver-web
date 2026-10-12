@@ -1,0 +1,82 @@
+//
+//  Brickles
+//  Added scene (not part of Apple's set)
+//
+//  The 1985 black-and-white Macintosh Breakout clone. The game plays itself
+//  (`value 1`: the paddle's autopilot), so the script only moves the camera.
+//  The autopilot lets the ball through on its 15th return, 31 seconds in.
+//
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+start simultaneous
+	scale out
+	let image = "Brickles"
+	let cursor = "None"
+	let ramp = "None"
+	add brickles at 176, 280 size 163, 179 value 1
+end simultaneous
+
+gosub bricks
+gosub paddle
+gosub score
+
+exit
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+bricks:
+
+	start simultaneous
+		let scene = "bricks"
+		let ramp = "Down"
+		camera to 22.5, 45
+		scroll to 200, 140
+	end simultaneous
+
+	scroll to 310, 170 over 22 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+paddle:
+
+	start simultaneous
+		let scene = "paddle"
+		let ramp = "Right"
+		camera to -22.5, 45
+		scroll to 205, 252
+	end simultaneous
+
+	scroll to 315, 260 over 22 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
+
+score:
+
+	start simultaneous
+		let scene = "score"
+		let ramp = "Left"
+		camera to 22.5, 45
+		scroll to 305, 100
+	end simultaneous
+
+	scroll to 205, 114 over 18 seconds async "scroll"
+	scale in over 3 seconds
+
+	wait until 3 seconds before "scroll" completes
+	scale out over 3 seconds
+
+	return
+
+//-------------------------------------------------------------------------------------------------------------------------------------------------
